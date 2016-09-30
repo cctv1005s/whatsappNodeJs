@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="./css/amazeui.css">
+    <link rel="stylesheet" type="text/css" href="./css/index.css">
+    <link rel="stylesheet" type="text/css" href="./css/emoji.css">
+    <title>WhatsApp</title>
+</head>
+<body> 
+    <div class="app k">
+      
+      <div class="header-bar"></div>
+      
+      <div class="main">
+        <div class="main-box">
+          
+          <%- partial('pane-one.ejs')%>
+
+          <%- partial('pane-two.ejs') %>
+          
+          <%- partial('pane-three.ejs') %>
+
+        </div>
+      </div>
+      <%- partial('emoji-box') %>
+    </div>
+
+    <script src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./js/jquery-smartMenu.js"></script>
+    <script type="text/javascript" src="./js/emoji.js"></script>
+    <script type="text/javascript" src="./js/whatsapp.compents.js"></script>
+    <script type="text/javascript" src="./js/whatsapp.index.js"></script>
+    <script type="text/javascript" src="./js/amazeui.min.js"></script>
+    <script type="text/javascript" src="./js/amazeui.widgets.helper.min.js"></script>
+
+</body>
+</html>
