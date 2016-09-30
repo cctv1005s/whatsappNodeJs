@@ -505,12 +505,14 @@ _pc(PC,function(){
 });
 
 _add(EBB,function(){
+
     EBB.fn.init = function(){
         //初始化emojiBox
         this.emojiBox = new emojiBox(this.node);
         this.emojiBox.init();
         this.$parent = this.$container.parent();
         this.hidden();
+        this.bindClick = this.emojiBox.bindClick;
     };
 
     EBB.fn.show = function(pos){
@@ -522,24 +524,33 @@ _add(EBB,function(){
             'left':x,
             'top':y
         });
+        this.Show = true;
         $parent.show();
     }
+    
     EBB.fn.hidden = function(){
+        this.Show = false;
         var $parent = this.$parent;
         $parent.hide(); 
     }
-    EBB.fn.bindClick = function(cb){
-        //返回绑定消息
-        this.emojiBox.bindClick(cb);
+    
+    EBB.fn.isShow = function(){
+        return this.Show;
     }
+
 });
 
 _add(EP,function(){
-
+    var isActive = false;
+    var $container  = {};
+    var self = {};
     EP.fn.init = function(){
         this.emojiBulbBox = this.option.emojiBulbBox;
         this.render();
         this.eventBind();
+        this.bindBulbBox();
+        $container = this.$container;
+        self = this;
     }
 
     EP.fn.render = function(){
@@ -549,7 +560,6 @@ _add(EP,function(){
             body = option.body,
             num = option.num||0,
             limit = option.limit; 
-
             var left = limit - num;
 
         var html =  '<div class="wa-editpane-title">'+title+'</div>'+
@@ -564,51 +574,110 @@ _add(EP,function(){
                 '</div>'+
               '</div>'+
             '</div>';
-
         $container.html(html);
     }
 
     EP.fn.eventBind = function(){
         var self = this;
         var $container = this.$container;
+        //emoji气泡
         $container.on('click',EP.btn.emoji, function(e){
             var $elem = $(e.currentTarget);
             var top = $elem.offset().top,
                 left = $elem.offset().left;
-            self.emojiBulbBox.show({
-                top:top,
-                left:left
-            });
+            self.toggleEmoji(top,left); 
         });
 
+        //开始输入
         $container.on('click',EP.btn.edit,function(e){
-            $container.addClass('editable');
-            $container.find(EP.btn.input).attr('contentEditable','true');
+            self.activeInput();
         });
-        
+
+        //确定输入
+        $container.on('click',EP.btn.check, function(event) {        
+            self.disabledInput();
+            self.bulbBox.hidden();
+        });
+
+        //输入框输入
         $container.on('input',EP.btn.input,function(e){
             var option = self.option,
                 num = option.num,
                 body = option.body,
                 limit = option.limit;
-
             self.option.num = $(e.currentTarget).text().length;
             var left = limit - num;
             if(left < 0){
                 $(e.currentTarget).html(self.option.body);
                 return;
             }
-
             self.option.body = $(e.currentTarget).html();
             $container.find(EP.btn.left).html(left);
         });
+    } 
+
+    EP.fn.activeInput = function(){
+        var $container = this.$container;
+        isActive = true;
+        $container.addClass('editable');
+        $container.find(EP.btn.input).attr('contentEditable','true');
+    }
+
+    EP.fn.disabledInput = function(){
+        var $container = this.$container;
+        isActive = false;
+        $container.removeClass('editable');
+        $container.find(EP.btn.input).attr('contentEditable','false');
+    }
+
+    EP.fn.isActive = function(){
+        return isActive;
+    }
+
+    /**
+    * 关闭或者打开EmojiBox
+    */
+    EP.fn.toggleEmoji = function(top,left){
+        var bulbBox = this.emojiBulbBox;
+        if(bulbBox.isShow()){
+            bulbBox.hidden();
+        }
+        else{
+            self.emojiBulbBox.show({
+                top:top,
+                left:left
+            });     
+        } 
+    }
+
+    /**
+    * 绑定输入框内容 
+    */
+    EP.fn.bindBulbBox = function(){
+        var bulbBox = this.emojiBulbBox;
+        bulbBox.bindClick(function(html){
+            if(bulbBox.isShow()&&self.isActive())
+            self.appendHtml(html);
+        });
+    }
+
+    /**
+    * 为html添加内容
+    *
+    * @params html 要添加的html字符
+    */
+    EP.fn.appendHtml = function(html){
+        if(this.isActive())
+            $container.find(EP.btn.input).append(html);
+
     }
 
     EP.btn = {};
     EP.btn.emoji = '[data-ep-emoji]';
     EP.btn.edit = '[data-ep-edit]';
     EP.btn.input = '[data-ep-input]';
-    EP.btn.left = '[data-ep-left]'
+    EP.btn.left = '[data-ep-left]';
+    EP.btn.check = '[data-ep-check]';
 });
 
 })(jQuery);
